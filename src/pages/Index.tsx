@@ -1,13 +1,38 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { HomeRibbon } from "@/components/layout/HomeRibbon";
+import { MyCasesView } from "@/components/home/MyCasesView";
+import { MessagesView } from "@/components/home/MessagesView";
+import { ReportsView } from "@/components/home/ReportsView";
+import { ContactsView } from "@/components/home/ContactsView";
+import { MySourcesView } from "@/components/home/MySourcesView";
 
 const Index = () => {
+  // Default to My Cases tab
+  const [activeTab, setActiveTab] = useState("/");
+
+  // Render the active view based on tab selection
+  const renderActiveView = () => {
+    switch (activeTab) {
+      case "/":
+        return <MyCasesView />;
+      case "/messages":
+        return <MessagesView />;
+      case "/reports":
+        return <ReportsView />;
+      case "/contacts":
+        return <ContactsView />;
+      case "/sources":
+        return <MySourcesView />;
+      default:
+        return <MyCasesView />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <AppLayout showRibbon={<HomeRibbon activeTab={activeTab} onTabChange={setActiveTab} />}>
+      {renderActiveView()}
+    </AppLayout>
   );
 };
 
