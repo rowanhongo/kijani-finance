@@ -21,7 +21,7 @@ const mockTimeEntries = [
 ];
 
 export default function Timesheets() {
-  const totalUnbilled = mockTimeEntries.filter(e => e.billable && !e.billed).reduce((sum, e) => sum + e.hours, 0);
+  const totalThisMonth = mockTimeEntries.reduce((sum, e) => sum + e.hours, 0);
 
   return (
     <AppLayout>
@@ -61,9 +61,9 @@ export default function Timesheets() {
           <div className="bg-card border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 text-warning mb-1">
               <Clock className="w-4 h-4" />
-              <span className="text-sm">Unbilled</span>
+              <span className="text-sm">This month</span>
             </div>
-            <p className="text-2xl font-semibold">{totalUnbilled}h</p>
+            <p className="text-2xl font-semibold">{totalThisMonth}h</p>
           </div>
         </div>
 

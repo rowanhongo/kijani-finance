@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -83,6 +84,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function MyCasesView() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -114,7 +116,11 @@ export function MyCasesView() {
           </TableHeader>
           <TableBody>
             {mockCases.map((caseItem) => (
-              <TableRow key={caseItem.id} className="case-row">
+              <TableRow
+                key={caseItem.id}
+                className="case-row cursor-pointer"
+                onClick={() => caseItem.id === "1" && navigate("/matters/1")}
+              >
                 <TableCell className="font-medium text-primary">
                   {caseItem.name}
                 </TableCell>
