@@ -1,43 +1,48 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  Home,
-  Briefcase,
-  FileText,
-  Calendar,
-  Clock,
-  Settings,
-} from "lucide-react";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Sidebar navigation items
+// Simple icon components matching the screenshot style
+const PenIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+  </svg>
+);
+
+const CircleIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+    <circle cx="12" cy="12" r="6" />
+  </svg>
+);
+
+const SquareIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+    <rect x="6" y="6" width="12" height="12" rx="1" />
+  </svg>
+);
+
+// Sidebar navigation items with simple icons
 const navItems = [
-  { icon: Home, label: "Home", path: "/" },
-  { icon: Briefcase, label: "Matters", path: "/matters" },
-  { icon: FileText, label: "Documents", path: "/documents" },
-  { icon: Calendar, label: "Calendar", path: "/calendar" },
-  { icon: Clock, label: "Timesheets", path: "/timesheets" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: PenIcon, label: "Home", path: "/" },
+  { icon: CircleIcon, label: "Matters", path: "/matters" },
+  { icon: SquareIcon, label: "Documents", path: "/documents" },
+  { icon: PenIcon, label: "Calendar", path: "/calendar" },
+  { icon: CircleIcon, label: "Timesheets", path: "/timesheets" },
+  { icon: SquareIcon, label: "Settings", path: "/settings" },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <aside className="w-16 bg-sidebar flex flex-col items-center py-4 shrink-0">
-      {/* Logo */}
-      <div className="mb-8">
-        <div className="w-10 h-10 rounded-lg bg-sidebar-accent flex items-center justify-center">
-          <span className="text-sidebar-foreground font-bold text-lg">S</span>
-        </div>
-      </div>
-
+    <aside className="w-12 bg-sidebar flex flex-col items-center py-6 shrink-0">
       {/* Navigation */}
-      <nav className="flex flex-col gap-2 flex-1">
-        {navItems.map((item) => {
+      <nav className="flex flex-col gap-4 flex-1">
+        {navItems.slice(0, 3).map((item) => {
           const isActive = location.pathname === item.path || 
             (item.path === "/" && location.pathname === "/");
           
@@ -47,14 +52,14 @@ export function AppSidebar() {
                 <NavLink
                   to={item.path}
                   className={`
-                    w-10 h-10 rounded-lg flex items-center justify-center transition-colors
+                    w-6 h-6 flex items-center justify-center transition-colors
                     ${isActive 
-                      ? "bg-sidebar-accent text-sidebar-foreground" 
-                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      ? "text-sidebar-foreground" 
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground"
                     }
                   `}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon />
                 </NavLink>
               </TooltipTrigger>
               <TooltipContent side="right" className="bg-foreground text-background">
