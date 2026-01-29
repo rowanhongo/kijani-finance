@@ -1,5 +1,3 @@
-import { NavLink } from "react-router-dom";
-
 // Ribbon tabs for Home context
 const ribbonTabs = [
   { label: "My Cases", path: "/" },
@@ -16,18 +14,28 @@ interface HomeRibbonProps {
 
 export function HomeRibbon({ activeTab, onTabChange }: HomeRibbonProps) {
   return (
-    <div className="bg-ribbon border-b border-border px-4 py-2">
-      <nav className="flex items-center gap-1">
-        {ribbonTabs.map((tab) => (
-          <button
-            key={tab.path}
-            onClick={() => onTabChange(tab.path)}
-            className={`ribbon-tab ${activeTab === tab.path ? "ribbon-tab-active" : ""}`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
+    <div className="flex flex-col">
+      {/* Gray banner area */}
+      <div className="h-20 bg-muted/60" />
+      
+      {/* Tab navigation - centered underlined links */}
+      <div className="border-b border-border bg-background">
+        <nav className="flex items-center justify-center gap-8 py-2">
+          {ribbonTabs.map((tab) => (
+            <button
+              key={tab.path}
+              onClick={() => onTabChange(tab.path)}
+              className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                activeTab === tab.path 
+                  ? "text-primary border-primary" 
+                  : "text-muted-foreground border-transparent hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
     </div>
   );
 }

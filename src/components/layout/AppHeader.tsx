@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Search, ChevronDown, User, LogOut, Settings } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { ChevronDown, User, LogOut, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,24 +11,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AppHeader() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchScope, setSearchScope] = useState<"all" | "matters">("all");
 
   return (
-    <header className="h-14 bg-card border-b border-border px-4 flex items-center justify-between shrink-0">
+    <header className="h-12 bg-muted/40 border-b border-border px-4 flex items-center justify-between shrink-0">
       {/* Left: Brand */}
-      <div className="flex items-center gap-6">
-        <h1 className="text-xl font-bold text-primary tracking-tight">SHERIA</h1>
+      <div className="flex items-center">
+        <h1 className="text-xl font-bold text-foreground tracking-tight">SHERIA</h1>
       </div>
 
-      {/* Center: Global Search */}
-      <div className="flex-1 max-w-md mx-8">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
+      {/* Center: Global Search with scope toggle */}
+      <div className="flex-1 flex justify-center">
+        <div className="flex items-center bg-sidebar rounded-md overflow-hidden">
+          <button
+            onClick={() => setSearchScope("all")}
+            className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+              searchScope === "all" 
+                ? "bg-sidebar-accent text-sidebar-foreground" 
+                : "text-sidebar-foreground/70 hover:text-sidebar-foreground"
+            }`}
+          >
+            All
+          </button>
+          <input
             type="text"
-            placeholder="Search cases, documents, contacts..."
+            placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
+            className="bg-sidebar text-sidebar-foreground placeholder:text-sidebar-foreground/50 px-3 py-1.5 text-sm w-48 outline-none"
           />
         </div>
       </div>
@@ -39,12 +48,12 @@ export function AppHeader() {
         <DropdownMenuTrigger className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted transition-colors outline-none">
           <Avatar className="w-8 h-8">
             <AvatarImage src="" />
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-              RH
+            <AvatarFallback className="bg-accent text-accent-foreground text-sm">
+              UO
             </AvatarFallback>
           </Avatar>
           <div className="text-left hidden sm:block">
-            <p className="text-sm font-medium">Rowan Hongo</p>
+            <p className="text-sm font-medium text-foreground">USER ONE</p>
             <p className="text-xs text-muted-foreground">Paralegal</p>
           </div>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -54,13 +63,13 @@ export function AppHeader() {
           <div className="px-3 py-2 border-b border-border">
             <div className="flex items-center gap-3">
               <Avatar className="w-10 h-10">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  RH
+                <AvatarFallback className="bg-accent text-accent-foreground">
+                  UO
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">Rowan Hongo</p>
-                <p className="text-xs text-muted-foreground">rowanhongo@enligne.rw</p>
+                <p className="font-medium">USER ONE</p>
+                <p className="text-xs text-muted-foreground">userone@enligne.rw</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <span className="w-2 h-2 rounded-full bg-success" />
                   <span className="text-xs text-muted-foreground">ID: 888985925</span>
