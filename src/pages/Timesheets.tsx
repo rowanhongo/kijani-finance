@@ -25,25 +25,25 @@ export default function Timesheets() {
 
   return (
     <AppLayout>
-      <div className="space-y-4">
+      <div className="space-y-4 min-w-0">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Timesheets</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold">Timesheets</h1>
             <p className="text-muted-foreground text-sm">Track and manage your billable hours</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" className="min-h-11 touch-target w-full sm:w-auto gap-2">
               <Play className="w-4 h-4" /> Start Timer
             </Button>
-            <Button className="bg-primary text-primary-foreground">
+            <Button className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
               <Plus className="w-4 h-4 mr-2" /> Manual Entry
             </Button>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-3 gap-4">
           <div className="bg-card border border-border rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <Clock className="w-4 h-4" />
@@ -68,8 +68,8 @@ export default function Timesheets() {
         </div>
 
         {/* Time Entries Table */}
-        <div className="bg-card rounded-lg border border-border overflow-hidden">
-          <Table>
+        <div className="bg-card rounded-lg border border-border overflow-x-auto overflow-y-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+          <Table className="min-w-[520px]">
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Date</TableHead>

@@ -174,19 +174,19 @@ export default function Documents() {
 
   return (
     <AppLayout>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Documents</h1>
+      <div className="space-y-4 min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold truncate">Documents</h1>
             <p className="text-muted-foreground text-sm">Firm document library</p>
           </div>
           <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground" aria-label="Upload document">
+              <Button className="w-full sm:w-auto min-h-11 touch-target bg-primary text-primary-foreground" aria-label="Upload document">
                 <Upload className="w-4 h-4 mr-2" /> Upload
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md" aria-describedby="upload-doc-description">
+            <DialogContent className="w-[calc(100vw-2rem)] max-w-md" aria-describedby="upload-doc-description">
               <DialogHeader>
                 <DialogTitle>Upload document</DialogTitle>
               </DialogHeader>
@@ -275,7 +275,7 @@ export default function Documents() {
                     value={uploadForm.type}
                     onValueChange={(v) => setUploadForm((f) => ({ ...f, type: v }))}
                   >
-                    <SelectTrigger id="doc-type">
+                    <SelectTrigger id="doc-type" className="min-h-11">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -314,11 +314,11 @@ export default function Documents() {
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setUploadOpen(false)}>
+                <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="outline" className="min-h-11 touch-target w-full sm:w-auto" onClick={() => setUploadOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-primary text-primary-foreground">
+                  <Button type="submit" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
                     Upload
                   </Button>
                 </div>
@@ -327,7 +327,7 @@ export default function Documents() {
           </Dialog>
 
           <Dialog open={newMatterFromUploadOpen} onOpenChange={setNewMatterFromUploadOpen}>
-            <DialogContent className="sm:max-w-md" aria-describedby="new-matter-from-upload-description">
+            <DialogContent className="w-[calc(100vw-2rem)] max-w-md" aria-describedby="new-matter-from-upload-description">
               <DialogHeader>
                 <DialogTitle>New matter</DialogTitle>
               </DialogHeader>
@@ -339,6 +339,7 @@ export default function Documents() {
                   <Label htmlFor="new-matter-name">Matter name</Label>
                   <Input
                     id="new-matter-name"
+                    className="min-h-11"
                     value={newMatterForm.name}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, name: e.target.value }))}
                     placeholder="e.g. Smith v. Acme Ltd"
@@ -349,6 +350,7 @@ export default function Documents() {
                   <Label htmlFor="new-matter-client">Client</Label>
                   <Input
                     id="new-matter-client"
+                    className="min-h-11"
                     value={newMatterForm.client}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, client: e.target.value }))}
                     placeholder="Client name"
@@ -358,6 +360,7 @@ export default function Documents() {
                   <Label htmlFor="new-matter-assigned">Assigned to</Label>
                   <Input
                     id="new-matter-assigned"
+                    className="min-h-11"
                     value={newMatterForm.assignedTo}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, assignedTo: e.target.value }))}
                     placeholder="e.g. Rowan Hongo"
@@ -367,6 +370,7 @@ export default function Documents() {
                   <Label htmlFor="new-matter-court">Court</Label>
                   <Input
                     id="new-matter-court"
+                    className="min-h-11"
                     value={newMatterForm.court}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, court: e.target.value }))}
                     placeholder="e.g. High Court"
@@ -380,7 +384,7 @@ export default function Documents() {
                       setNewMatterForm((f) => ({ ...f, status: v }))
                     }
                   >
-                    <SelectTrigger id="new-matter-status">
+                    <SelectTrigger id="new-matter-status" className="min-h-11">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -412,15 +416,16 @@ export default function Documents() {
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                   <Button
                     type="button"
                     variant="outline"
+                    className="min-h-11 touch-target w-full sm:w-auto"
                     onClick={() => setNewMatterFromUploadOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-primary text-primary-foreground">
+                  <Button type="submit" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
                     Create matter
                   </Button>
                 </div>
@@ -429,37 +434,37 @@ export default function Documents() {
           </Dialog>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 w-full min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search documents..." className="pl-9" />
+            <Input placeholder="Search documents..." className="pl-9 min-h-11 w-full" />
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="min-h-11 touch-target w-full sm:w-auto">
             <Filter className="w-4 h-4 mr-2" /> Filters
           </Button>
         </div>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 grid-cols-1">
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 
-                         hover:border-primary/30 transition-colors cursor-pointer flex-wrap"
+              className="bg-card border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3 
+                         hover:border-primary/30 transition-colors cursor-pointer min-w-0"
             >
               <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
                 <FileText className="w-5 h-5 text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 order-first">
                 <h3 className="font-medium truncate">{doc.name}</h3>
-                <p className="text-sm text-muted-foreground">{doc.matter}</p>
+                <p className="text-sm text-muted-foreground truncate">{doc.matter}</p>
               </div>
-              <Badge variant="secondary" className="text-xs shrink-0">{doc.type}</Badge>
-              <div className="flex flex-wrap gap-1 min-w-0 max-w-[180px]" title="Viewable by">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                <Badge variant="secondary" className="text-xs shrink-0">{doc.type}</Badge>
                 <ViewableByBadges viewableBy={doc.viewableBy} viewableByOptions={VIEWABLE_BY_OPTIONS} />
+                <span className="text-sm text-muted-foreground">{doc.size}</span>
+                <span className="text-sm text-muted-foreground">{doc.date}</span>
               </div>
-              <span className="text-sm text-muted-foreground shrink-0">{doc.size}</span>
-              <span className="text-sm text-muted-foreground shrink-0">{doc.date}</span>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
                 <Button variant="ghost" size="icon" className="w-8 h-8" aria-label="View">
                   <Eye className="w-4 h-4" />
                 </Button>

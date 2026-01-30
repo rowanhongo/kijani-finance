@@ -103,22 +103,22 @@ export function ContactsView() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">Contacts</h2>
+    <div className="space-y-4 min-w-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-semibold truncate">Contacts</h2>
           <p className="text-muted-foreground text-sm">
             Clients, opposing counsel, courts, and external contacts
           </p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary text-primary-foreground" aria-label="Add contact">
+            <Button className="w-full sm:w-auto min-h-11 touch-target bg-primary text-primary-foreground" aria-label="Add contact">
               <Plus className="w-4 h-4 mr-2" />
               Add Contact
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md" aria-describedby="add-contact-description">
+          <DialogContent className="w-[calc(100vw-2rem)] max-w-md" aria-describedby="add-contact-description">
             <DialogHeader>
               <DialogTitle>Add Contact</DialogTitle>
             </DialogHeader>
@@ -140,6 +140,7 @@ export function ContactsView() {
                 <Label htmlFor="add-relationship">Relationship</Label>
                 <Input
                   id="add-relationship"
+                  className="min-h-11"
                   value={form.relationship}
                   onChange={(e) => setForm((f) => ({ ...f, relationship: e.target.value }))}
                   placeholder="e.g. Client, Opposing counsel"
@@ -160,6 +161,7 @@ export function ContactsView() {
                 <Input
                   id="add-email"
                   type="email"
+                  className="min-h-11"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                   placeholder="If available"
@@ -175,11 +177,11 @@ export function ContactsView() {
                   placeholder="If available"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" className="min-h-11 touch-target w-full sm:w-auto" onClick={() => setAddOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-primary text-primary-foreground">
+                <Button type="submit" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
                   Add Contact
                 </Button>
               </div>
@@ -188,11 +190,11 @@ export function ContactsView() {
         </Dialog>
       </div>
 
-      <div className="relative max-w-md">
+      <div className="relative w-full max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search contacts..."
-          className="pl-9"
+          className="pl-9 min-h-11"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -202,7 +204,7 @@ export function ContactsView() {
         {filtered.map((contact) => (
           <div
             key={contact.id}
-            className="p-4 flex items-center gap-4 hover:bg-muted/50 group"
+            className="p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 hover:bg-muted/50 group min-w-0"
           >
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0
@@ -228,7 +230,7 @@ export function ContactsView() {
             <Button
               variant="ghost"
               size="icon"
-              className="w-8 h-8 shrink-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 focus:opacity-100"
+              className="w-10 h-10 min-w-[44px] min-h-[44px] touch-target shrink-0 text-muted-foreground hover:text-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
               onClick={() => openEdit(contact)}
               aria-label={`Edit ${contact.name}`}
             >
@@ -240,7 +242,7 @@ export function ContactsView() {
 
       {/* Edit contact dialog */}
       <Dialog open={!!editContact} onOpenChange={(open) => !open && setEditContact(null)}>
-        <DialogContent className="sm:max-w-md" aria-describedby="edit-contact-description">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md" aria-describedby="edit-contact-description">
           <DialogHeader>
             <DialogTitle>Edit contact</DialogTitle>
           </DialogHeader>
@@ -253,6 +255,7 @@ export function ContactsView() {
                 <Label htmlFor="edit-name">Name</Label>
                 <Input
                   id="edit-name"
+                  className="min-h-11"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="Full name"
@@ -273,6 +276,7 @@ export function ContactsView() {
                 <Input
                   id="edit-phone"
                   type="tel"
+                  className="min-h-11"
                   value={form.phone}
                   onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                   placeholder="If available"
@@ -283,6 +287,7 @@ export function ContactsView() {
                 <Input
                   id="edit-email"
                   type="email"
+                  className="min-h-11"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                   placeholder="If available"
@@ -298,11 +303,11 @@ export function ContactsView() {
                   placeholder="If available"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setEditContact(null)}>
+              <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" className="min-h-11 touch-target w-full sm:w-auto" onClick={() => setEditContact(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-primary text-primary-foreground">
+                <Button type="submit" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
                   Save changes
                 </Button>
               </div>

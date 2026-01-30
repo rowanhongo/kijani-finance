@@ -12,27 +12,25 @@ const mockSources = [
 
 export function MySourcesView() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">My Sources</h2>
+    <div className="space-y-4 min-w-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-semibold truncate">My Sources</h2>
           <p className="text-muted-foreground text-sm">
             Personal knowledge base, research notes, and templates
           </p>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
+        <Button size="sm" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
           <Plus className="w-4 h-4 mr-1" /> Add Source
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
+      <div className="relative w-full max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search your sources..." className="pl-9" />
+        <Input placeholder="Search your sources..." className="pl-9 min-h-11 w-full" />
       </div>
 
-      {/* Sources grid */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         {mockSources.map((source) => (
           <div
             key={source.id}

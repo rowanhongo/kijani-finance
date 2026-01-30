@@ -62,29 +62,29 @@ export default function MatterDetail() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 min-w-0">
         <Button
           variant="ghost"
           onClick={() => navigate("/matters")}
-          className="gap-2 -ml-2"
+          className="gap-2 -ml-2 min-h-11 touch-target"
           aria-label="Back to matters"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Matters
         </Button>
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold">{matter.name}</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold break-words">{matter.name}</h1>
             <p className="text-muted-foreground text-sm mt-1">Matter overview — what a lawyer would see</p>
           </div>
-          <span className={statusStyles[matter.status] ?? "status-badge"}>
+          <span className={statusStyles[matter.status] ?? "status-badge shrink-0"}>
             {matter.status.charAt(0).toUpperCase() + matter.status.slice(1)}
           </span>
         </div>
 
         {/* Key info */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3">
             <User className="w-5 h-5 text-primary shrink-0" />
             <div>
@@ -129,7 +129,7 @@ export default function MatterDetail() {
                   <p className="font-medium">{doc.name}</p>
                   <p className="text-sm text-muted-foreground">{doc.date} · {doc.type}</p>
                 </div>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="min-h-9 touch-target">
                   View
                 </Button>
               </li>

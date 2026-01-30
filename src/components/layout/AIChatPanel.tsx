@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useChatPanel } from "@/contexts/ChatPanelContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MAX_OPEN_CHATS = 2;
 const CHAT_HISTORY_KEY = "sheria-chat-history";
@@ -72,6 +73,7 @@ interface AIChatPanelProps {
 
 export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
   const { isMinimized, setIsMinimized } = useChatPanel();
+  const isMobile = useIsMobile();
   const [message, setMessage] = useState("");
   const [openChats, setOpenChats] = useState<ChatSession[]>(() => [
     { id: crypto.randomUUID(), title: "New chat", createdAt: Date.now() },
@@ -291,18 +293,23 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
       <button
         type="button"
         onClick={() => setIsMinimized(false)}
-        className="fixed bottom-4 right-4 w-12 h-12 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors z-50 focus-visible:ring-2 focus-visible:ring-ring"
+        className="fixed bottom-4 right-4 w-14 h-14 min-w-[56px] min-h-[56px] touch-target bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors z-50 focus-visible:ring-2 focus-visible:ring-ring"
+        style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom, 0px))", marginRight: "max(1rem, env(safe-area-inset-right, 0px))" }}
         aria-label="Open chat"
       >
-        <MessageSquare className="w-5 h-5" />
+        <MessageSquare className="w-6 h-6" />
       </button>
     );
   }
 
+  const panelWrapperClass = isMobile
+    ? "fixed inset-0 z-50 flex flex-col bg-background min-h-0"
+    : "w-72 bg-background border-l border-border flex flex-col shrink-0 min-h-0";
+
   return (
-    <aside className="w-72 bg-background border-l border-border flex flex-col shrink-0 min-h-0">
+    <aside className={cn(panelWrapperClass, "flex flex-col")}>
       {/* Header: chat tabs, Plus, Clock, More */}
-      <div className="relative px-3 py-2 flex items-center gap-2 border-b border-border min-h-10 shrink-0">
+      <div className="relative px-3 py-2 flex items-center gap-2 border-b border-border min-h-12 sm:min-h-10 shrink-0 pt-[env(safe-area-inset-top)] sm:pt-0">
         <div className="flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
           {openChats.map((chat) => (
             <div
@@ -406,9 +413,9 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="w-7 h-7 text-muted-foreground hover:text-foreground"
+            className="w-10 h-10 min-w-[44px] min-h-[44px] touch-target text-muted-foreground hover:text-foreground"
             onClick={() => setIsMinimized(true)}
-            aria-label="Chat options"
+            aria-label="Close chat"
           >
             <MoreHorizontal className="w-4 h-4" />
           </Button>

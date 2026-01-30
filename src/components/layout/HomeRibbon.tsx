@@ -31,7 +31,7 @@ export function HomeRibbon({ activeTab, onTabChange }: HomeRibbonProps) {
   return (
     <div className="flex flex-col">
       {/* Banner - layered wavy green, title + count, date */}
-      <div className="relative mx-6 mt-0 mb-0 overflow-hidden rounded-b-2xl min-h-[100px] flex flex-col justify-end">
+      <div className="relative mx-4 sm:mx-6 mt-0 mb-0 overflow-hidden rounded-b-2xl min-h-[100px] flex flex-col justify-end">
         {/* Layered gradient - pale mint to teal */}
         <div
           className="absolute inset-0"
@@ -71,10 +71,10 @@ export function HomeRibbon({ activeTab, onTabChange }: HomeRibbonProps) {
         </div>
       </div>
 
-      {/* Tab navigation - centered underlined links */}
-      <div className="border-b border-border bg-background">
+      {/* Tab navigation - scroll on mobile, centered on desktop */}
+      <div className="border-b border-border bg-background overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         <nav
-          className="flex items-center justify-center gap-8 py-2.5"
+          className="flex items-center gap-6 sm:gap-8 py-2.5 justify-start sm:justify-center min-w-max sm:min-w-0"
           aria-label="Home tabs"
         >
           {ribbonTabs.map((tab) => (
@@ -82,7 +82,7 @@ export function HomeRibbon({ activeTab, onTabChange }: HomeRibbonProps) {
               key={tab.path}
               type="button"
               onClick={() => onTabChange(tab.path)}
-              className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+              className={`text-sm font-medium pb-1 border-b-2 transition-colors whitespace-nowrap min-h-10 touch-target px-1 ${
                 activeTab === tab.path
                   ? "text-[#006F6F] dark:text-teal-400 border-[#006F6F] dark:border-teal-400"
                   : "text-muted-foreground border-transparent hover:text-foreground"

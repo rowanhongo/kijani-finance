@@ -117,19 +117,19 @@ export default function Matters() {
 
   return (
     <AppLayout>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Matters</h1>
+      <div className="space-y-4 min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold truncate">Matters</h1>
             <p className="text-muted-foreground text-sm">Firm-wide case management</p>
           </div>
           <Dialog open={newMatterOpen} onOpenChange={setNewMatterOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground" aria-label="New matter">
+              <Button className="w-full sm:w-auto min-h-11 touch-target bg-primary text-primary-foreground" aria-label="New matter">
                 <Plus className="w-4 h-4 mr-2" /> New Matter
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md" aria-describedby="new-matter-description">
+            <DialogContent className="w-[calc(100vw-2rem)] max-w-md" aria-describedby="new-matter-description">
               <DialogHeader>
                 <DialogTitle>New matter</DialogTitle>
               </DialogHeader>
@@ -141,6 +141,7 @@ export default function Matters() {
                   <Label htmlFor="matter-name">Matter name</Label>
                   <Input
                     id="matter-name"
+                    className="min-h-11"
                     value={newMatterForm.name}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, name: e.target.value }))}
                     placeholder="e.g. Smith v. Acme Ltd"
@@ -151,6 +152,7 @@ export default function Matters() {
                   <Label htmlFor="matter-client">Client</Label>
                   <Input
                     id="matter-client"
+                    className="min-h-11"
                     value={newMatterForm.client}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, client: e.target.value }))}
                     placeholder="Client name"
@@ -160,6 +162,7 @@ export default function Matters() {
                   <Label htmlFor="matter-assigned">Assigned to</Label>
                   <Input
                     id="matter-assigned"
+                    className="min-h-11"
                     value={newMatterForm.assignedTo}
                     onChange={(e) => setNewMatterForm((f) => ({ ...f, assignedTo: e.target.value }))}
                     placeholder="e.g. Rowan Hongo"
@@ -182,7 +185,7 @@ export default function Matters() {
                       setNewMatterForm((f) => ({ ...f, status: v }))
                     }
                   >
-                    <SelectTrigger id="matter-status">
+                    <SelectTrigger id="matter-status" className="min-h-11">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -217,11 +220,11 @@ export default function Matters() {
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setNewMatterOpen(false)}>
+                <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="outline" className="min-h-11 touch-target w-full sm:w-auto" onClick={() => setNewMatterOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-primary text-primary-foreground">
+                  <Button type="submit" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
                     Create matter
                   </Button>
                 </div>
@@ -230,18 +233,18 @@ export default function Matters() {
           </Dialog>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 w-full min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search matters..." className="pl-9" />
+            <Input placeholder="Search matters..." className="pl-9 min-h-11 w-full" />
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="min-h-11 touch-target w-full sm:w-auto">
             <Filter className="w-4 h-4 mr-2" /> Filters
           </Button>
         </div>
 
-        <div className="bg-card rounded-lg border border-border overflow-hidden">
-          <Table>
+        <div className="bg-card rounded-lg border border-border overflow-x-auto overflow-y-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+          <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Matter Name</TableHead>

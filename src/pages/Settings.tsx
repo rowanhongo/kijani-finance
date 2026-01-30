@@ -23,9 +23,9 @@ export default function Settings() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 min-w-0">
         <div>
-          <h1 className="text-2xl font-semibold">Settings</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Your personal preferences. Firm-wide settings are in the Admin Dashboard (coming later).
           </p>
@@ -48,7 +48,7 @@ export default function Settings() {
                   type="button"
                   onClick={() => setTheme(opt.value)}
                   className={cn(
-                    "inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors",
+                    "inline-flex items-center gap-2 px-4 py-2.5 min-h-11 touch-target rounded-lg border text-sm font-medium transition-colors",
                     currentTheme === opt.value
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-background border-border hover:bg-muted/50 hover:border-muted-foreground/30"
@@ -74,16 +74,16 @@ export default function Settings() {
             Control how you receive alerts and reminders.
           </p>
           <div className="space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded border-border" />
+            <label className="flex items-center gap-3 cursor-pointer min-h-11 touch-target py-1">
+              <input type="checkbox" defaultChecked className="rounded border-border w-5 h-5 shrink-0" />
               <span className="text-sm">Email notifications for new messages</span>
             </label>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded border-border" />
+            <label className="flex items-center gap-3 cursor-pointer min-h-11 touch-target py-1">
+              <input type="checkbox" defaultChecked className="rounded border-border w-5 h-5 shrink-0" />
               <span className="text-sm">Remind me about upcoming deadlines</span>
             </label>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" className="rounded border-border" />
+            <label className="flex items-center gap-3 cursor-pointer min-h-11 touch-target py-1">
+              <input type="checkbox" className="rounded border-border w-5 h-5 shrink-0" />
               <span className="text-sm">Desktop notifications</span>
             </label>
           </div>
@@ -102,7 +102,7 @@ export default function Settings() {
             <Label className="text-sm">List density</Label>
             <select
               defaultValue="comfortable"
-              className="w-full max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="w-full max-w-xs min-h-11 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               aria-label="List density"
             >
               <option value="compact">Compact</option>

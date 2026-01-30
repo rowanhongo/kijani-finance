@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, User, LogOut, Settings, Search as SearchIcon } from "lucide-react";
+import { ChevronDown, User, LogOut, Settings, Search as SearchIcon, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const SEARCH_SCOPES = [
   { value: "all", label: "All" },
@@ -19,31 +20,49 @@ const SEARCH_SCOPES = [
 
 type SearchScope = (typeof SEARCH_SCOPES)[number]["value"];
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchScope, setSearchScope] = useState<SearchScope>("all");
 
   const scopeLabel = SEARCH_SCOPES.find((s) => s.value === searchScope)?.label ?? "All";
 
   return (
-    <header className="h-12 bg-muted/40 border-b border-border px-4 flex items-center justify-between shrink-0">
-      {/* Left: Brand - SHERIA prominent */}
-      <div className="flex items-center shrink-0">
-        <h1 className="text-xl font-bold text-foreground tracking-tight logo-serif">SHERIA</h1>
+    <header className="h-12 sm:h-12 min-h-[44px] bg-muted/40 border-b border-border px-3 sm:px-4 flex items-center justify-between shrink-0 gap-2">
+      {/* Left: Hamburger (mobile) + Brand */}
+      <div className="flex items-center gap-2 min-w-0 shrink-0">
+        {onMenuClick && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="md:hidden h-10 w-10 min-h-[44px] min-w-[44px] touch-target shrink-0"
+            onClick={onMenuClick}
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+        )}
+        <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight logo-serif truncate">
+          SHERIA
+        </h1>
       </div>
 
-      {/* Center: Global Search - scope dropdown + input + magnifying glass */}
-      <div className="flex-1 flex justify-center min-w-0 px-4">
+      {/* Center: Global Search - hidden on very small, compact on mobile */}
+      <div className="flex-1 flex justify-center min-w-0 px-2 sm:px-4 max-w-[200px] sm:max-w-none">
         <div
-          className="flex items-center bg-muted rounded-lg overflow-hidden border border-border max-w-md w-full"
+          className="flex items-center bg-muted rounded-lg overflow-hidden border border-border w-full max-w-md min-h-[40px] sm:min-h-9"
           role="search"
         >
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/80 transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-l-lg"
+              className="flex items-center gap-1 px-2 sm:px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/80 transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-l-lg min-h-[40px] sm:min-h-9 touch-target"
               aria-label="Search scope"
             >
-              {scopeLabel}
+              <span className="truncate max-w-[60px] sm:max-w-none">{scopeLabel}</span>
               <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48 bg-popover">
@@ -63,11 +82,11 @@ export function AppHeader() {
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground px-3 py-2 text-sm outline-none min-w-0"
+            className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground px-2 sm:px-3 py-2 text-sm outline-none min-w-0 min-h-[40px] sm:min-h-9"
             aria-label="Search"
           />
           <span
-            className="flex items-center justify-center w-10 h-9 text-muted-foreground shrink-0"
+            className="flex items-center justify-center w-9 h-9 sm:w-10 min-h-[40px] sm:min-h-9 text-muted-foreground shrink-0 touch-target"
             aria-hidden
           >
             <SearchIcon className="w-4 h-4" />
@@ -75,10 +94,10 @@ export function AppHeader() {
         </div>
       </div>
 
-      {/* Right: User profile - USER ONE, Paralegal, dropdown */}
+      {/* Right: User profile */}
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-1.5 rounded-lg hover:bg-muted transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[44px] min-w-[44px] touch-target shrink-0"
           aria-label="User menu"
         >
           <Avatar className="w-8 h-8 shrink-0 rounded">
@@ -91,7 +110,7 @@ export function AppHeader() {
             <p className="text-sm font-medium text-foreground leading-tight">USER ONE</p>
             <p className="text-xs text-muted-foreground leading-tight">Paralegal</p>
           </div>
-          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
+          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 hidden sm:block" aria-hidden />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-popover">
           <div className="px-3 py-2 border-b border-border">

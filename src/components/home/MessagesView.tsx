@@ -165,7 +165,7 @@ export function MessagesView() {
 
       {/* Create new group dialog - Telegram-style new bubble */}
       <Dialog open={addGroupOpen} onOpenChange={setAddGroupOpen}>
-        <DialogContent className="sm:max-w-md" aria-describedby="create-group-description">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md" aria-describedby="create-group-description">
           <DialogHeader>
             <DialogTitle>Create new group</DialogTitle>
           </DialogHeader>
@@ -177,6 +177,7 @@ export function MessagesView() {
               <Label htmlFor="group-name">Group name</Label>
               <Input
                 id="group-name"
+                className="min-h-11"
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 placeholder="e.g. Kamara matter team"
@@ -192,11 +193,11 @@ export function MessagesView() {
                 placeholder="Names or emails, comma-separated"
               />
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setAddGroupOpen(false)}>
+            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" className="min-h-11 touch-target w-full sm:w-auto" onClick={() => setAddGroupOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-primary text-primary-foreground">
+              <Button type="submit" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
                 Create group
               </Button>
             </div>

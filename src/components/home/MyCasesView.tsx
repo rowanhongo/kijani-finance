@@ -86,23 +86,23 @@ function StatusBadge({ status }: { status: string }) {
 export function MyCasesView() {
   const navigate = useNavigate();
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">My Cases</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-semibold truncate">My Cases</h2>
           <p className="text-muted-foreground text-sm">
             Cases assigned to you, sorted by recent activity
           </p>
         </div>
-        <Badge variant="secondary" className="text-sm">
+        <Badge variant="secondary" className="text-sm w-fit shrink-0">
           {mockCases.filter(c => c.status !== "closed").length} Active
         </Badge>
       </div>
 
-      {/* Cases Table */}
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <Table>
+      {/* Cases Table - horizontal scroll on mobile */}
+      <div className="bg-card rounded-lg border border-border overflow-x-auto overflow-y-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="font-semibold">Case Name</TableHead>

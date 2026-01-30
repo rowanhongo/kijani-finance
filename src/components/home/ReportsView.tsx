@@ -24,20 +24,20 @@ const mockReports = [
 
 export function ReportsView() {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">Reports</h2>
+    <div className="space-y-4 min-w-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-semibold truncate">Reports</h2>
           <p className="text-muted-foreground text-sm">
             Your personal reports, views, and analytics
           </p>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
+        <Button size="sm" className="min-h-11 touch-target w-full sm:w-auto bg-primary text-primary-foreground">
           + New Report
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {mockReports.map((report) => (
           <div
             key={report.id}
