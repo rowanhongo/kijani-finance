@@ -20,12 +20,30 @@ exports.handler = async function (event) {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Keep the payload simple; the API key is passed in the URL. Adjust body if the upstream API needs a different shape.
-      body: JSON.stringify({ prompt: message }),
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{
+            text: 'You are Sheria AI, a legal assistant for East African law firms. Help lawyers with legal research, document drafting, case analysis, and legal questions relevant to Kenya, Tanzania, Uganda, and Rwanda. Be concise, professional, and precise.'
+          }]
+        },
+        contents: [{
+          parts: [{ text: message }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.7,
+        }
+      }),
     });
 
+    if (!res.ok) {
+      const text = await res.text();
+      return { statusCode: 502, body: JSON.stringify({ success: false, error: `Gemini error ${res.status}: ${text}` }) };
+    }
+
     const data = await res.json();
-    return { statusCode: 200, body: JSON.stringify(data) };
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '(no response)';
+    return { statusCode: 200, body: JSON.stringify({ success: true, response: reply }) };
   } catch (err) {
     return { statusCode: 502, body: JSON.stringify({ success: false, error: String(err) }) };
   }
