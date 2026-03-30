@@ -15,11 +15,13 @@ exports.handler = async function (event) {
   if (!API_KEY) return { statusCode: 500, body: JSON.stringify({ success: false, error: 'Server missing APIFREE_LLM_KEY' }) };
 
   try {
-    // Use native global fetch (available in Netlify Node runtime). This avoids bundling node-fetch.
-    const res = await fetch('https://apifreellm.com/api/v1/chat', {
+    // Forward to the configured LLM endpoint (Google Generative Language API in this deployment).
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` },
-      body: JSON.stringify({ message }),
+      headers: { 'Content-Type': 'application/json' },
+      // Keep the payload simple; the API key is passed in the URL. Adjust body if the upstream API needs a different shape.
+      body: JSON.stringify({ prompt: message }),
     });
 
     const data = await res.json();

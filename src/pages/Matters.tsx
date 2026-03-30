@@ -260,7 +260,7 @@ export default function Matters() {
                 <TableRow
                   key={matter.id}
                   className="case-row cursor-pointer"
-                  onClick={() => matter.id === "1" && navigate("/matters/1")}
+                  onClick={() => navigate(`/matters/${matter.id}`)}
                 >
                   <TableCell className="font-medium text-primary">{matter.name}</TableCell>
                   <TableCell>{matter.client}</TableCell>

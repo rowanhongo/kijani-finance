@@ -13,6 +13,7 @@ const Matters = lazy(() => import("./pages/Matters"));
 const MatterDetail = lazy(() => import("./pages/MatterDetail"));
 const Documents = lazy(() => import("./pages/Documents"));
 const Calendar = lazy(() => import("./pages/Calendar"));
+const Contacts = lazy(() => import("./pages/Contacts"));
 const Timesheets = lazy(() => import("./pages/Timesheets"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/matters" element={<Matters />} />
             <Route path="/matters/:id" element={<MatterDetail />} />
             <Route path="/documents" element={<Documents />} />
+            <Route path="/contacts" element={<Contacts />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/timesheets" element={<Timesheets />} />
             <Route path="/settings" element={<Settings />} />

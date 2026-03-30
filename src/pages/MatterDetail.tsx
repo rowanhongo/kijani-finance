@@ -3,45 +3,35 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, FileText, Calendar, User, Building2 } from "lucide-react";
-
-const mockMatterDetail: Record<
-  string,
-  {
-    name: string;
-    client: string;
-    court: string;
-    status: string;
-    assignedTo: string;
-    opened: string;
-    nextHearing?: string;
-    documents: { name: string; date: string; type: string }[];
-    notes: string;
-  }
-> = {
-  "1": {
-    name: "Kamara v. National Bank",
-    client: "John Kamara",
-    court: "High Court, Nairobi",
-    status: "active",
-    assignedTo: "Rowan Hongo",
-    opened: "2023-08-15",
-    nextHearing: "2024-02-15",
-    documents: [
-      { name: "Witness Statement - John Kamara", date: "2024-01-28", type: "Statement" },
-      { name: "Pleadings - Amended Defence", date: "2024-01-10", type: "Pleading" },
-      { name: "Court Order - Directions", date: "2023-12-01", type: "Order" },
-    ],
-    notes:
-      "Client alleges wrongful termination and breach of contract. National Bank filed amended defence. Witness statements exchanged. Next: hearing date 15 Feb 2024.",
-  },
-};
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function MatterDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const matter = id ? mockMatterDetail[id] : null;
 
-  if (!matter) {
+  const fetchMatter = async () => {
+    if (!supabase || !id) return null;
+    const { data, error } = await supabase.from("matters").select("*").eq("id", id).single();
+    if (error) throw error;
+    return data;
+  };
+
+  const { data: matter, isLoading, isError } = useQuery({
+    queryKey: ["matter", id],
+    queryFn: fetchMatter,
+    enabled: !!id,
+  });
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div>Loading…</div>
+      </AppLayout>
+    );
+  }
+
+  if (isError || !matter) {
     return (
       <AppLayout>
         <div className="space-y-4">
@@ -103,18 +93,18 @@ export default function MatterDetail() {
             <Calendar className="w-5 h-5 text-primary shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">Opened</p>
-              <p className="font-medium">{matter.opened}</p>
+              <p className="font-medium">{matter.opened ?? "—"}</p>
             </div>
           </div>
           <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3">
             <Calendar className="w-5 h-5 text-primary shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground">Next hearing</p>
-              <p className="font-medium">{matter.nextHearing ?? "—"}</p>
+              <p className="font-medium">{matter.next_hearing ?? matter.nextHearing ?? "—"}</p>
             </div>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">Assigned to: {matter.assignedTo}</p>
+        <p className="text-sm text-muted-foreground">Assigned to: {matter.assigned_to ?? matter.assignedTo}</p>
 
         {/* Documents */}
         <div className="bg-card border border-border rounded-lg overflow-hidden">
@@ -123,7 +113,7 @@ export default function MatterDetail() {
             <h2 className="font-semibold">Documents</h2>
           </div>
           <ul className="divide-y divide-border">
-            {matter.documents.map((doc, i) => (
+            {(matter.documents ?? []).map((doc: any, i: number) => (
               <li key={i} className="px-4 py-3 flex items-center justify-between hover:bg-muted/50">
                 <div>
                   <p className="font-medium">{doc.name}</p>
@@ -143,7 +133,7 @@ export default function MatterDetail() {
             <h2 className="font-semibold">Matter notes</h2>
           </div>
           <div className="px-4 py-4">
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{matter.notes}</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{matter.notes ?? matter.notes}</p>
           </div>
         </div>
       </div>

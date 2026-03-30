@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,7 +85,20 @@ const ViewableByBadges = ({
 
 export default function Documents() {
   const { matters, addMatter, VIEWABLE_BY_OPTIONS } = useMatters();
-  const [documents, setDocuments] = useState<DocumentItem[]>(initialDocuments);
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const fetchDocuments = async () => {
+    if (!supabase) return [] as any[];
+    const { data, error } = await supabase.from("documents").select("*");
+    if (error) throw error;
+    return data as any[];
+  };
+
+  const { data: documents = [], isLoading: docsLoading } = useQuery({
+    queryKey: ["documents"],
+    queryFn: fetchDocuments,
+  });
   const [uploadOpen, setUploadOpen] = useState(false);
   const [matterComboboxOpen, setMatterComboboxOpen] = useState(false);
   const [newMatterFromUploadOpen, setNewMatterFromUploadOpen] = useState(false);
@@ -119,22 +134,44 @@ export default function Documents() {
     });
   };
 
-  const handleUpload = (e: React.FormEvent) => {
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!supabase) throw new Error("Supabase not configured");
+      const path = `${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage.from("documents").upload(path, file, { upsert: false });
+      if (uploadError) throw uploadError;
+      const { data: publicData } = supabase.storage.from("documents").getPublicUrl(path);
+      const publicUrl = publicData?.publicUrl ?? null;
+      // insert metadata
+      const payload = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        matter_id: uploadForm.matterId || null,
+        file_path: path,
+        file_type: file.type,
+        size: file.size,
+        uploaded_at: new Date().toISOString(),
+      };
+      const { error } = await supabase.from("documents").insert([payload]);
+      if (error) throw error;
+      return { publicUrl, payload };
+    },
+    onSuccess: () => queryClient.invalidateQueries(["documents"]),
+  });
+
+  const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadForm.name.trim()) return;
-    const matterName = selectedMatter?.name ?? "—";
-    const newDoc: DocumentItem = {
-      id: crypto.randomUUID(),
-      name: uploadForm.name.trim(),
-      matter: matterName,
-      type: uploadForm.type,
-      date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-      size: "—",
-      viewableBy: uploadForm.viewableBy,
-    };
-    setDocuments((prev) => [newDoc, ...prev]);
-    setUploadForm({ name: "", matterId: "", type: "Statement", viewableBy: ["all"] });
-    setUploadOpen(false);
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return alert("Please choose a file");
+    try {
+      await uploadMutation.mutateAsync(file);
+      setUploadForm({ name: "", matterId: "", type: "Statement", viewableBy: ["all"] });
+      setUploadOpen(false);
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("Upload failed: " + String(err));
+    }
   };
 
   const toggleNewMatterViewableBy = (value: ViewableBy) => {
@@ -268,6 +305,10 @@ export default function Documents() {
                       </Command>
                     </PopoverContent>
                   </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="doc-file">File</Label>
+                  <input id="doc-file" ref={fileInputRef} type="file" className="w-full" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="doc-type">Type</Label>
@@ -445,35 +486,60 @@ export default function Documents() {
         </div>
 
         <div className="grid gap-3 grid-cols-1">
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              className="bg-card border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3 
-                         hover:border-primary/30 transition-colors cursor-pointer min-w-0"
-            >
-              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                <FileText className="w-5 h-5 text-primary" />
+          {docsLoading ? (
+            <div>Loading…</div>
+          ) : (
+            documents.map((doc: any) => (
+              <div
+                key={doc.id}
+                className="bg-card border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3 
+                           hover:border-primary/30 transition-colors cursor-pointer min-w-0"
+              >
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0 order-first">
+                  <h3 className="font-medium truncate">{doc.name}</h3>
+                  <p className="text-sm text-muted-foreground truncate">{doc.matter_id ?? "—"}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <Badge variant="secondary" className="text-xs shrink-0">{doc.file_type}</Badge>
+                  <span className="text-sm text-muted-foreground">{Math.round((doc.size ?? 0) / 1024)} KB</span>
+                  <span className="text-sm text-muted-foreground">{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-8 h-8"
+                    aria-label="Open"
+                    onClick={() => {
+                      if (!supabase) return;
+                      const { data } = supabase.storage.from("documents").getPublicUrl(doc.file_path);
+                      const url = data?.publicUrl;
+                      if (url) window.open(url, "_blank");
+                    }}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-8 h-8"
+                    aria-label="Download"
+                    onClick={async () => {
+                      if (!supabase) return;
+                      const { data } = supabase.storage.from("documents").getPublicUrl(doc.file_path);
+                      const url = data?.publicUrl;
+                      if (url) window.open(url, "_blank");
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex-1 min-w-0 order-first">
-                <h3 className="font-medium truncate">{doc.name}</h3>
-                <p className="text-sm text-muted-foreground truncate">{doc.matter}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 min-w-0">
-                <Badge variant="secondary" className="text-xs shrink-0">{doc.type}</Badge>
-                <ViewableByBadges viewableBy={doc.viewableBy} viewableByOptions={VIEWABLE_BY_OPTIONS} />
-                <span className="text-sm text-muted-foreground">{doc.size}</span>
-                <span className="text-sm text-muted-foreground">{doc.date}</span>
-              </div>
-              <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
-                <Button variant="ghost" size="icon" className="w-8 h-8" aria-label="View">
-                  <Eye className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="w-8 h-8" aria-label="Download">
-                  <Download className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </AppLayout>

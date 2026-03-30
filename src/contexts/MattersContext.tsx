@@ -1,4 +1,6 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useContext } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
 
 const VIEWABLE_BY_OPTIONS = [
   { value: "all", label: "All" },
@@ -22,14 +24,6 @@ export interface MatterItem {
   viewableBy: ViewableBy[];
 }
 
-const initialMatters: MatterItem[] = [
-  { id: "1", name: "Kamara v. National Bank", client: "John Kamara", assignedTo: "Rowan Hongo", status: "active", court: "High Court", viewableBy: ["all"] },
-  { id: "2", name: "TechCorp Employment Dispute", client: "TechCorp Ltd", assignedTo: "Sarah Kimani", status: "active", court: "Industrial Court", viewableBy: ["partners"] },
-  { id: "3", name: "Estate of Mwangi", client: "Wanjiku Mwangi", assignedTo: "Rowan Hongo", status: "pending", court: "High Court", viewableBy: ["paralegals", "partners"] },
-  { id: "4", name: "Okonkwo Land Dispute", client: "Chidi Okonkwo", assignedTo: "David Ochieng", status: "active", court: "ELC", viewableBy: ["associates", "counsel"] },
-  { id: "5", name: "Abebe Construction", client: "Abebe Construction", assignedTo: "Sarah Kimani", status: "closed", court: "Commercial", viewableBy: ["all"] },
-];
-
 interface MattersContextValue {
   matters: MatterItem[];
   addMatter: (matter: MatterItem) => void;
@@ -39,11 +33,53 @@ interface MattersContextValue {
 const MattersContext = createContext<MattersContextValue | null>(null);
 
 export const MattersProvider = ({ children }: { children: React.ReactNode }) => {
-  const [matters, setMatters] = useState<MatterItem[]>(initialMatters);
+  const queryClient = useQueryClient();
 
-  const addMatter = useCallback((matter: MatterItem) => {
-    setMatters((prev) => [matter, ...prev]);
-  }, []);
+  const fetchMatters = async () => {
+    if (!supabase) return [] as MatterItem[];
+    const { data, error } = await supabase.from("matters").select("*");
+    if (error) throw error;
+    return (data as any[])?.map((r) => ({
+      id: r.id,
+      name: r.name,
+      client: r.client,
+      assignedTo: r.assigned_to ?? r.assignedTo ?? "—",
+      status: r.status,
+      court: r.court,
+      viewableBy: r.viewable_by ?? r.viewableBy ?? ["all"],
+    }));
+  };
+
+  const mattersQuery = useQuery<MatterItem[]>({
+    queryKey: ["matters"],
+    queryFn: fetchMatters,
+    staleTime: 1000 * 60,
+  });
+
+  const addMatterMutation = useMutation({
+    mutationFn: async (matter: MatterItem) => {
+      if (!supabase) throw new Error("Supabase not configured");
+      const payload = {
+        id: matter.id,
+        name: matter.name,
+        client: matter.client,
+        assigned_to: matter.assignedTo,
+        status: matter.status,
+        court: matter.court,
+        viewable_by: matter.viewableBy,
+      };
+      const { error } = await supabase.from("matters").insert([payload]);
+      if (error) throw error;
+      return matter;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["matters"]);
+    },
+  });
+
+  const matters = mattersQuery.data ?? [];
+
+  const addMatter = (m: MatterItem) => addMatterMutation.mutate(m);
 
   return (
     <MattersContext.Provider value={{ matters, addMatter, VIEWABLE_BY_OPTIONS }}>
