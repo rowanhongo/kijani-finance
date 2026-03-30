@@ -1,36 +1,50 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
 import { supabase } from "@/lib/supabaseClient";
 
 export function ReportsView() {
   const queryClient = useQueryClient();
   const BUCKET = (import.meta.env.VITE_SUPABASE_BUCKET as string) || "recordings";
 
-  const fetchRecordings = async () => {
+  const fetchRecordingsFromStorage = async () => {
     if (!supabase) return [];
-    const { data, error } = await supabase.from("recordings").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase.storage
+      .from("recordings")
+      .list("", {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: "created_at", order: "desc" },
+      });
     if (error) throw error;
-    return data as any[];
+    return data ?? [];
   };
 
-  const { data: recordings = [], isLoading } = useQuery({ queryKey: ["recordings"], queryFn: fetchRecordings });
+  const { data: recordings = [], isLoading } = useQuery({
+    queryKey: ["recordings-storage"],
+    queryFn: fetchRecordingsFromStorage,
+  });
 
   const deleteRecording = useMutation({
     mutationFn: async (rec: any) => {
       if (!supabase) throw new Error("Supabase not configured");
-      // remove file from storage
-      if (rec.path) {
-        const { error: rmErr } = await supabase.storage.from(BUCKET).remove([rec.path]);
+      // remove file from storage (file.name expected from storage.list)
+      const fileName = rec.name ?? rec.path ?? rec.id;
+      if (fileName) {
+        const { error: rmErr } = await supabase.storage.from(BUCKET).remove([fileName]);
         if (rmErr) throw rmErr;
       }
-      // remove metadata row
-      const { error } = await supabase.from("recordings").delete().eq("id", rec.id);
+      // remove metadata row if it exists (match by path/name)
+      const { error } = await supabase.from("recordings").delete().or(`path.eq.${fileName},name.eq.${fileName}`);
       if (error) throw error;
       return rec;
     },
-    onSuccess: () => queryClient.invalidateQueries(["recordings"]),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["recordings-storage"]);
+      queryClient.invalidateQueries(["recordings"]);
+    },
   });
 
   return (
@@ -45,28 +59,29 @@ export function ReportsView() {
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading ? (
-          // show 6 skeleton cards while loading
-          Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-lg p-4">
+          // show 3 skeleton cards while loading
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="p-4">
               <Skeleton className="h-4 w-3/4 mb-3" />
               <Skeleton className="h-3 w-1/2 mb-4" />
               <Skeleton className="h-10 w-full" />
-            </div>
+            </Card>
           ))
         ) : recordings.length === 0 ? (
-          <div className="p-6 text-center text-muted-foreground">No recordings yet</div>
+          <div className="p-6 text-center text-muted-foreground">No recordings yet. Use the voice recorder in the AI chat panel to create one.</div>
         ) : (
-          recordings.map((rec: any) => {
-            const publicUrl = supabase ? supabase.storage.from(BUCKET).getPublicUrl(rec.path).data?.publicUrl : null;
-            const sizeBytes = rec.size ?? rec.file_size ?? 0;
+          recordings.map((file: any) => {
+            const { data: urlData } = supabase ? supabase.storage.from("recordings").getPublicUrl(file.name) : { data: { publicUrl: null } };
+            const publicUrl = urlData?.publicUrl ?? null;
+            const sizeBytes = file.metadata?.size ? Number(file.metadata.size) : file.size ?? 0;
             const fmtSize = formatBytes(sizeBytes);
             return (
-              <div key={rec.id} className="bg-card border border-border rounded-lg p-4 hover:border-primary/30 transition-colors">
+              <Card key={file.id ?? file.name} className="p-4 hover:border-primary/30 transition-colors">
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium">{rec.name ?? rec.path}</h3>
-                      <p className="text-xs text-muted-foreground">{new Date(rec.created_at).toLocaleString()}</p>
+                      <h3 className="font-medium">{file.name}</h3>
+                      <p className="text-xs text-muted-foreground">{new Date(file.created_at).toLocaleDateString()}</p>
                     </div>
                     <div className="text-xs text-muted-foreground">{fmtSize}</div>
                   </div>
@@ -77,12 +92,16 @@ export function ReportsView() {
                   ) : (
                     <div className="text-sm text-muted-foreground">Audio not available</div>
                   )}
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-2">
+                    {publicUrl && (
+                      <Button variant="ghost" onClick={() => window.open(publicUrl, "_blank")} aria-label="Download">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
-                      size="icon"
                       onClick={() => {
-                        if (confirm("Delete this recording?")) deleteRecording.mutate(rec);
+                        if (confirm("Delete this recording?")) deleteRecording.mutate(file);
                       }}
                       aria-label="Delete"
                     >
@@ -90,7 +109,7 @@ export function ReportsView() {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
             );
           })
         )}
