@@ -16,6 +16,16 @@ import {
 import { cn } from "@/lib/utils";
 import { useChatPanel } from "@/contexts/ChatPanelContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import VoiceRecorder from "@/components/VoiceRecorder";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const APIFREE_KEY = import.meta.env.VITE_APIFREE_LLM_KEY as string;
+
+const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 const MAX_OPEN_CHATS = 2;
 const CHAT_HISTORY_KEY = "sheria-chat-history";
@@ -85,6 +95,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
   const [messagesByChatId, setMessagesByChatId] = useState<Record<string, ChatMessage[]>>({});
   const [reference, setReference] = useState<ReferenceValue>(context as ReferenceValue);
   const [pendingHistoryChat, setPendingHistoryChat] = useState<ChatSession | null>(null);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeId = activeChatId ?? openChats[0]?.id ?? null;
@@ -184,19 +195,23 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
     [openChats]
   );
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const text = message.trim();
     if (!text || !activeId) return;
+    setIsSending(true);
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
       content: text,
     };
+
+    // add user message locally
     setMessagesByChatId((prev) => ({
       ...prev,
       [activeId]: [...(prev[activeId] ?? []), userMsg],
     }));
     setMessage("");
+
     // Update chat title from first message
     if (activeMessages.length === 0) {
       const title = text.length > 30 ? text.slice(0, 27) + "..." : text;
@@ -204,18 +219,72 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
         prev.map((c) => (c.id === activeId ? { ...c, title } : c))
       );
     }
-    // Placeholder assistant reply (no real LLM)
-    const assistantMsg: ChatMessage = {
-      id: crypto.randomUUID(),
+
+    // Save message to supabase messages table if client available
+    try {
+      if (supabaseClient) {
+        await supabaseClient.from("messages").insert([
+          { role: "user", content: text },
+        ]);
+      }
+    } catch (err) {
+      console.warn("Could not persist message", err);
+    }
+
+    // insert a placeholder assistant message so UI shows immediate feedback
+    const placeholderId = crypto.randomUUID();
+    const placeholderMsg: ChatMessage = {
+      id: placeholderId,
       role: "assistant",
-      content: "Reply would appear here when connected to an LLM.",
+      content: "Thinking...",
     };
-    setTimeout(() => {
+    setMessagesByChatId((prev) => ({
+      ...prev,
+      [activeId]: [...(prev[activeId] ?? []), placeholderMsg],
+    }));
+
+    // Call apifreellm
+    try {
+      const res = await fetch("https://apifreellm.com/api/v1/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: APIFREE_KEY ? `Bearer ${APIFREE_KEY}` : "",
+        },
+        body: JSON.stringify({ message: text }),
+      });
+      const data = await res.json();
+      const reply = data?.response ?? "(no response)";
+
+      // replace placeholder with real reply
       setMessagesByChatId((prev) => ({
         ...prev,
-        [activeId]: [...(prev[activeId] ?? []), assistantMsg],
+        [activeId]: (prev[activeId] ?? []).map((m) =>
+          m.id === placeholderId ? { ...m, content: reply } : m
+        ),
       }));
-    }, 300);
+
+      // persist assistant response
+      try {
+        if (supabaseClient) {
+          await supabaseClient.from("messages").insert([
+            { role: "assistant", content: reply },
+          ]);
+        }
+      } catch (err) {
+        console.warn("Could not persist assistant response", err);
+      }
+    } catch (err) {
+      console.error("LLM call failed", err);
+      setMessagesByChatId((prev) => ({
+        ...prev,
+        [activeId]: (prev[activeId] ?? []).map((m) =>
+          m.id === placeholderId ? { ...m, content: "Error getting response" } : m
+        ),
+      }));
+    } finally {
+      setIsSending(false);
+    }
   }, [message, activeId, activeMessages.length]);
 
   const handleKeyDown = useCallback(
@@ -279,7 +348,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
         size="icon"
         variant="ghost"
         className="w-8 h-8 shrink-0 text-[#1E7D6A] dark:text-teal-400 hover:text-[#1E7D6A]/90 dark:hover:text-teal-300 disabled:opacity-50"
-        disabled={!message.trim()}
+        disabled={!message.trim() || isSending}
         onClick={handleSend}
         aria-label="Send message"
       >
@@ -489,6 +558,9 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
             </div>
           </div>
           {referenceSelector}
+          <div className="p-3 border-t border-border">
+            <VoiceRecorder />
+          </div>
           <div className="flex-1 min-h-0 overflow-hidden" aria-hidden />
         </>
       ) : (
