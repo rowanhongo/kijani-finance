@@ -19,7 +19,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabaseClient";
-const APIFREE_KEY = import.meta.env.VITE_APIFREE_LLM_KEY as string;
 
 const MAX_OPEN_CHATS = 2;
 const CHAT_HISTORY_KEY = "sheria-chat-history";
@@ -216,7 +215,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
 
     try {
       if (supabase) {
-        await supabase.from("messages").insert([{ role: "user", content: text }]);
+        await supabase.from("messages").insert({ role: "user", content: text });
       }
     } catch (err) {
       console.warn("Could not persist message", err);
@@ -234,31 +233,28 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
       [activeId]: [...(prev[activeId] ?? []), placeholderMsg],
     }));
 
-    // If LLM key missing, notify user and replace placeholder with a helpful note
-    if (!APIFREE_KEY) {
-      const msg = "LLM key not set. Set VITE_APIFREE_LLM_KEY in .env";
-      toast({ title: "LLM key missing", description: msg });
-      setMessagesByChatId((prev) => ({
-        ...prev,
-        [activeId]: (prev[activeId] ?? []).map((m) =>
-          m.id === placeholderId ? { ...m, content: msg } : m
-        ),
-      }));
-      setIsSending(false);
-      return;
-    }
-
-    // Call apifreellm
+    // Call server-side LLM proxy
     try {
       const res = await fetch("/.netlify/functions/llm-proxy", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
       });
       const data = await res.json();
-      const reply = data?.response ?? "(no response)";
+
+      if (res.status === 429) {
+        const reply = "⏳ Please wait a moment before sending another message.";
+        setMessagesByChatId((prev) => ({
+          ...prev,
+          [activeId]: (prev[activeId] ?? []).map((m) =>
+            m.id === placeholderId ? { ...m, content: reply } : m
+          ),
+        }));
+        setIsSending(false);
+        return;
+      }
+
+      const reply = data?.response ?? data?.error ?? "(no response)";
 
       // replace placeholder with real reply
       setMessagesByChatId((prev) => ({
@@ -270,7 +266,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
 
       try {
         if (supabase) {
-          await supabase.from("messages").insert([{ role: "assistant", content: reply }]);
+          await supabase.from("messages").insert({ role: "assistant", content: reply });
         }
       } catch (err) {
         console.warn("Could not persist assistant response", err);

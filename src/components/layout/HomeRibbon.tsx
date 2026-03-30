@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 const ribbonTabs = [
   { label: "My Cases", path: "/", count: 6 },
   { label: "Messages", path: "/messages", count: 3 },
-  { label: "Reports", path: "/reports", count: 16 },
+  { label: "Recordings", path: "/reports", count: 16 },
   { label: "Contacts", path: "/contacts", count: 5 },
   { label: "My Sources", path: "/sources", count: 4 },
 ];
