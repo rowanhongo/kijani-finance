@@ -1,5 +1,3 @@
-const fetch = global.fetch || require('node-fetch');
-
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
@@ -17,6 +15,7 @@ exports.handler = async function (event) {
   if (!API_KEY) return { statusCode: 500, body: JSON.stringify({ success: false, error: 'Server missing APIFREE_LLM_KEY' }) };
 
   try {
+    // Use native global fetch (available in Netlify Node runtime). This avoids bundling node-fetch.
     const res = await fetch('https://apifreellm.com/api/v1/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` },

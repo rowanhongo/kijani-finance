@@ -18,7 +18,8 @@ exports.handler = async function (event) {
   const BUCKET = process.env.VITE_SUPABASE_BUCKET || 'recordings';
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return { statusCode: 500, body: JSON.stringify({ error: 'Missing Supabase server keys' }) };
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { global: { fetch } });
+  // Use the runtime's global fetch. Do not require node-fetch here; Netlify provides global fetch.
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
     const buffer = Buffer.from(base64, 'base64');
