@@ -23,6 +23,19 @@ export default function MatterDetail() {
     enabled: !!id,
   });
 
+  const fetchDocuments = async () => {
+    if (!supabase || !id) return [];
+    const { data, error } = await supabase.from("matter_documents").select("*").eq("matter_id", id).order("uploaded_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  };
+
+  const { data: documents = [], isLoading: docsLoading } = useQuery({
+    queryKey: ["matter_documents", id],
+    queryFn: fetchDocuments,
+    enabled: !!id,
+  });
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -106,24 +119,35 @@ export default function MatterDetail() {
         </div>
         <p className="text-sm text-muted-foreground">Assigned to: {matter.assigned_to ?? matter.assignedTo}</p>
 
-        {/* Documents */}
+  {/* Documents */}
         <div className="bg-card border border-border rounded-lg overflow-hidden">
           <div className="px-4 py-3 border-b border-border flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
             <h2 className="font-semibold">Documents</h2>
           </div>
           <ul className="divide-y divide-border">
-            {(matter.documents ?? []).map((doc: any, i: number) => (
-              <li key={i} className="px-4 py-3 flex items-center justify-between hover:bg-muted/50">
-                <div>
-                  <p className="font-medium">{doc.name}</p>
-                  <p className="text-sm text-muted-foreground">{doc.date} · {doc.type}</p>
+            {docsLoading ? (
+              <li className="px-4 py-6">
+                <div className="space-y-2">
+                  <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
+                  <div className="h-3 w-1/4 bg-muted animate-pulse rounded" />
                 </div>
-                <Button variant="ghost" size="sm" className="min-h-9 touch-target">
-                  View
-                </Button>
               </li>
-            ))}
+            ) : documents.length === 0 ? (
+              <li className="px-4 py-6 text-muted-foreground">No documents</li>
+            ) : (
+              documents.map((doc: any) => (
+                <li key={doc.id} className="px-4 py-3 flex items-center justify-between hover:bg-muted/50">
+                  <div>
+                    <p className="font-medium">{doc.name ?? doc.filename}</p>
+                    <p className="text-sm text-muted-foreground">{new Date(doc.uploaded_at).toLocaleString()}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="min-h-9 touch-target">
+                    View
+                  </Button>
+                </li>
+              ))
+            )}
           </ul>
         </div>
 

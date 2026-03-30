@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Play, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabaseClient";
 
 export function ReportsView() {
@@ -44,28 +45,39 @@ export function ReportsView() {
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading ? (
-          <div>Loading…</div>
+          // show 6 skeleton cards while loading
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-lg p-4">
+              <Skeleton className="h-4 w-3/4 mb-3" />
+              <Skeleton className="h-3 w-1/2 mb-4" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))
+        ) : recordings.length === 0 ? (
+          <div className="p-6 text-center text-muted-foreground">No recordings yet</div>
         ) : (
           recordings.map((rec: any) => {
             const publicUrl = supabase ? supabase.storage.from(BUCKET).getPublicUrl(rec.path).data?.publicUrl : null;
+            const sizeBytes = rec.size ?? rec.file_size ?? 0;
+            const fmtSize = formatBytes(sizeBytes);
             return (
               <div key={rec.id} className="bg-card border border-border rounded-lg p-4 hover:border-primary/30 transition-colors">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                      <Play className="w-5 h-5 text-primary" />
-                    </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium">{rec.name ?? rec.path}</h3>
                       <p className="text-xs text-muted-foreground">{new Date(rec.created_at).toLocaleString()}</p>
                     </div>
+                    <div className="text-xs text-muted-foreground">{fmtSize}</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {publicUrl && (
-                      <Button variant="ghost" size="icon" onClick={() => window.open(publicUrl, "_blank")} aria-label="Play">
-                        <Play className="w-4 h-4" />
-                      </Button>
-                    )}
+                  {publicUrl ? (
+                    <audio controls src={publicUrl} className="w-full" preload="metadata">
+                      Your browser does not support the <code>audio</code> element.
+                    </audio>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Audio not available</div>
+                  )}
+                  <div className="flex justify-end">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -85,4 +97,17 @@ export function ReportsView() {
       </div>
     </div>
   );
+}
+
+function formatBytes(bytes: number) {
+  if (!bytes) return "0 B";
+  const thresh = 1024;
+  if (Math.abs(bytes) < thresh) return bytes + " B";
+  const units = ["KB", "MB", "GB", "TB"];
+  let u = -1;
+  do {
+    bytes /= thresh;
+    ++u;
+  } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+  return bytes.toFixed(1) + " " + units[u];
 }

@@ -11,8 +11,8 @@ exports.handler = async function (event) {
   const message = body.message;
   if (!message) return { statusCode: 400, body: 'Missing message' };
 
-  const API_KEY = process.env.APIFREE_LLM_KEY;
-  if (!API_KEY) return { statusCode: 500, body: JSON.stringify({ success: false, error: 'Server missing APIFREE_LLM_KEY' }) };
+  const API_KEY = process.env.GEMINI_API_KEY;
+  if (!API_KEY) return { statusCode: 500, body: JSON.stringify({ success: false, error: 'Server missing GEMINI_API_KEY' }) };
 
   try {
     // Forward to the configured LLM endpoint (Google Generative Language API in this deployment).
