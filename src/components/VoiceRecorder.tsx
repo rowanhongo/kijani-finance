@@ -1,11 +1,4 @@
 import React, { useState, useRef } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-const SUPABASE_BUCKET = (import.meta.env.VITE_SUPABASE_BUCKET as string) || "recordings";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const VoiceRecorder: React.FC = () => {
   const [recording, setRecording] = useState(false);
@@ -29,8 +22,7 @@ const VoiceRecorder: React.FC = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
-        // auto upload
-        await uploadAudio(audioBlob);
+        await uploadAudioViaServer(audioBlob);
       };
 
       recorder.start();
@@ -48,46 +40,35 @@ const VoiceRecorder: React.FC = () => {
     }
   };
 
-  const uploadAudio = async (audioBlob: Blob) => {
+  const uploadAudioViaServer = async (audioBlob: Blob) => {
     setUploading(true);
     try {
       const id = crypto.randomUUID();
       const ext = "webm";
-      const path = `${id}.${ext}`;
+      const filename = `${id}.${ext}`;
 
-      // upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from(SUPABASE_BUCKET)
-        .upload(path, audioBlob, { upsert: false });
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binary = "";
+      for (let i = 0; i < uint8Array.length; i++) binary += String.fromCharCode(uint8Array[i]);
+      const base64 = btoa(binary);
 
-      if (uploadError) throw uploadError;
+      const res = await fetch('/.netlify/functions/upload-audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, contentType: audioBlob.type, base64 }),
+      });
 
-      // get public url
-      const { data: publicData } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
-      const publicUrl = publicData?.publicUrl || null;
-
-      // store metadata in recordings table if available
-      try {
-        await supabase.from("recordings").insert([
-          {
-            id,
-            path,
-            bucket: SUPABASE_BUCKET,
-            content_type: audioBlob.type,
-            size: audioBlob.size,
-          },
-        ]);
-      } catch (err) {
-        // ignore metadata insert errors but log
-        console.warn("Could not insert recording metadata", err);
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || `upload failed ${res.status}`);
       }
 
-      if (publicUrl) {
-        setAudioUrl(publicUrl);
-      }
+      const data = await res.json();
+      if (data?.publicUrl) setAudioUrl(data.publicUrl);
     } catch (err) {
-      console.error("Upload failed", err);
-      alert("Upload failed. Check console for details.");
+      console.error('Upload failed', err);
+      alert('Upload failed. Check console for details.');
     } finally {
       setUploading(false);
     }

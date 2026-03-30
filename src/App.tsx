@@ -16,6 +16,8 @@ const Calendar = lazy(() => import("./pages/Calendar"));
 const Timesheets = lazy(() => import("./pages/Timesheets"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Login = lazy(() => import("./pages/Login"));
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/timesheets" element={<Timesheets />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

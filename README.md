@@ -1,6 +1,6 @@
 # SHERIA
 
-Legal practice management — matters, documents, calendar, timesheets, and AI chat.
+Legal practice management: matters documents calendar timesheets and AI chat.
 
 ## Tech stack
 
@@ -25,11 +25,11 @@ npm run build
 
 ## Scripts
 
-- `npm run dev` — start dev server
-- `npm run build` — production build
-- `npm run preview` — preview production build
-- `npm run lint` — run ESLint
-- `npm run test` — run tests
+- `npm run dev` - start dev server
+- `npm run build` - production build
+- `npm run preview` - preview production build
+- `npm run lint` - run ESLint
+- `npm run test` - run tests
 
 ## Environment
 
@@ -41,11 +41,16 @@ Copy `.env.example` to `.env` and fill in your keys. Example variables used by t
 - VITE_SUPABASE_BUCKET (default: recordings)
 - VITE_APIFREE_LLM_KEY
 
-Do not commit `.env` — it is ignored by `.gitignore`.
+Do not commit `.env`. It is ignored by `.gitignore`.
 
 ## Deploy (Netlify)
 
 1. In Netlify Dashboard set the environment variables listed above.
+	 - For serverless functions add the server-only keys (do NOT prefix with VITE_):
+		 - APIFREE_LLM_KEY (apifreellm key)
+		 - SUPABASE_SERVICE_ROLE_KEY (Supabase service role key)
+		 - SUPABASE_URL (your Supabase project URL)
+		 - VITE_SUPABASE_BUCKET (optional, default: recordings)
 2. Set the build command to:
 
 ```sh

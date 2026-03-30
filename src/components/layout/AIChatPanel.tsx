@@ -17,15 +17,9 @@ import { cn } from "@/lib/utils";
 import { useChatPanel } from "@/contexts/ChatPanelContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import VoiceRecorder from "@/components/VoiceRecorder";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
 const APIFREE_KEY = import.meta.env.VITE_APIFREE_LLM_KEY as string;
-
-const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
 
 const MAX_OPEN_CHATS = 2;
 const CHAT_HISTORY_KEY = "sheria-chat-history";
@@ -38,7 +32,6 @@ const REFERENCE_OPTIONS = [
 
 type ReferenceValue = (typeof REFERENCE_OPTIONS)[number]["value"];
 
-/* Typing area - light theme: green bg; dark theme: dark bg + light text for legibility */
 const CHAT_INPUT_CLASS =
   "flex-1 text-sm px-3 py-2 rounded-md outline-none min-w-0 " +
   "text-foreground bg-[#E9F3F3] border border-[#1E7D6A]/40 placeholder:text-[#1E7D6A]/70 " +
@@ -96,6 +89,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
   const [reference, setReference] = useState<ReferenceValue>(context as ReferenceValue);
   const [pendingHistoryChat, setPendingHistoryChat] = useState<ChatSession | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeId = activeChatId ?? openChats[0]?.id ?? null;
@@ -220,12 +214,9 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
       );
     }
 
-    // Save message to supabase messages table if client available
     try {
-      if (supabaseClient) {
-        await supabaseClient.from("messages").insert([
-          { role: "user", content: text },
-        ]);
+      if (supabase) {
+        await supabase.from("messages").insert([{ role: "user", content: text }]);
       }
     } catch (err) {
       console.warn("Could not persist message", err);
@@ -243,13 +234,26 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
       [activeId]: [...(prev[activeId] ?? []), placeholderMsg],
     }));
 
+    // If LLM key missing, notify user and replace placeholder with a helpful note
+    if (!APIFREE_KEY) {
+      const msg = "LLM key not set. Set VITE_APIFREE_LLM_KEY in .env";
+      toast({ title: "LLM key missing", description: msg });
+      setMessagesByChatId((prev) => ({
+        ...prev,
+        [activeId]: (prev[activeId] ?? []).map((m) =>
+          m.id === placeholderId ? { ...m, content: msg } : m
+        ),
+      }));
+      setIsSending(false);
+      return;
+    }
+
     // Call apifreellm
     try {
-      const res = await fetch("https://apifreellm.com/api/v1/chat", {
+      const res = await fetch("/.netlify/functions/llm-proxy", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: APIFREE_KEY ? `Bearer ${APIFREE_KEY}` : "",
         },
         body: JSON.stringify({ message: text }),
       });
@@ -264,12 +268,9 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
         ),
       }));
 
-      // persist assistant response
       try {
-        if (supabaseClient) {
-          await supabaseClient.from("messages").insert([
-            { role: "assistant", content: reply },
-          ]);
+        if (supabase) {
+          await supabase.from("messages").insert([{ role: "assistant", content: reply }]);
         }
       } catch (err) {
         console.warn("Could not persist assistant response", err);
@@ -377,7 +378,6 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
 
   return (
     <aside className={cn(panelWrapperClass, "flex flex-col")}>
-      {/* Header: chat tabs, Plus, Clock, More */}
       <div className="relative px-3 py-2 flex items-center gap-2 border-b border-border min-h-12 sm:min-h-10 shrink-0 pt-[env(safe-area-inset-top)] sm:pt-0">
         <div className="flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
           {openChats.map((chat) => (
@@ -532,7 +532,6 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
       )}
 
       {!hasMessages ? (
-        /* Cursor-style: initial message at top */
         <>
           <div className="border-b border-border shrink-0">
             <div className="flex items-center gap-2 p-3">
@@ -564,7 +563,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
           <div className="flex-1 min-h-0 overflow-hidden" aria-hidden />
         </>
       ) : (
-        /* Continuation: messages above, input at bottom */
+        
         <>
           {referenceSelector}
           <div className="flex-1 overflow-y-auto min-h-0 p-3 space-y-3">
@@ -582,6 +581,9 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
               </div>
             ))}
             <div ref={messagesEndRef} />
+            <div className="p-3 border-t border-border">
+              <VoiceRecorder />
+            </div>
           </div>
           {inputRow()}
         </>

@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Sun, Moon, Monitor, Bell, LayoutGrid } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 type ThemeValue = "light" | "dark" | "system";
@@ -20,6 +21,7 @@ export default function Settings() {
   useEffect(() => setMounted(true), []);
 
   const currentTheme = (theme ?? "system") as ThemeValue;
+  const { toast } = useToast();
 
   return (
     <AppLayout>
@@ -31,7 +33,7 @@ export default function Settings() {
           </p>
         </div>
 
-        {/* Theme - like VSCode */}
+        
         <section className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center gap-2 mb-4">
             <Sun className="w-5 h-5 text-primary" aria-hidden />
@@ -64,7 +66,7 @@ export default function Settings() {
           )}
         </section>
 
-        {/* Notifications */}
+        
         <section className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center gap-2 mb-4">
             <Bell className="w-5 h-5 text-primary" aria-hidden />
@@ -83,13 +85,38 @@ export default function Settings() {
               <span className="text-sm">Remind me about upcoming deadlines</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer min-h-11 touch-target py-1">
-              <input type="checkbox" className="rounded border-border w-5 h-5 shrink-0" />
+              <input
+                type="checkbox"
+                className="rounded border-border w-5 h-5 shrink-0"
+                onChange={async (e) => {
+                  const enabled = e.currentTarget.checked;
+                  if (enabled) {
+                    if (typeof Notification !== "undefined") {
+                      const perm = await Notification.requestPermission();
+                      if (perm === "granted") {
+                        try {
+                          new Notification("Sheria", { body: "Desktop notifications enabled" });
+                        } catch (err) {
+                          // ignore
+                        }
+                        toast({ title: "Notifications enabled", description: "Desktop notifications are enabled" });
+                      } else {
+                        toast({ title: "Permission denied", description: "Browser denied notification permission" });
+                      }
+                    } else {
+                      toast({ title: "Not supported", description: "Notifications are not supported in this environment" });
+                    }
+                  } else {
+                    toast({ title: "Notifications disabled", description: "Desktop notifications are turned off" });
+                  }
+                }}
+              />
               <span className="text-sm">Desktop notifications</span>
             </label>
           </div>
         </section>
 
-        {/* Display / density */}
+        
         <section className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center gap-2 mb-4">
             <LayoutGrid className="w-5 h-5 text-primary" aria-hidden />
