@@ -12,10 +12,8 @@ import { Button } from "@/components/ui/button";
 
 const SEARCH_SCOPES = [
   { value: "all", label: "All" },
-  { value: "matters", label: "Matters" },
-  { value: "documents", label: "Documents" },
-  { value: "calendar", label: "Calendar" },
-  { value: "timesheets", label: "Timesheets" },
+  { value: "loans", label: "Loans" },
+  { value: "stock", label: "Stock" },
 ] as const;
 
 type SearchScope = (typeof SEARCH_SCOPES)[number]["value"];
@@ -47,7 +45,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </Button>
         )}
         <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight logo-serif truncate">
-          SHERIA
+          KIJANI
         </h1>
       </div>
 
@@ -108,7 +106,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </Avatar>
           <div className="text-left hidden sm:block shrink-0">
             <p className="text-sm font-medium text-foreground leading-tight">USER ONE</p>
-            <p className="text-xs text-muted-foreground leading-tight">Paralegal</p>
+            <p className="text-xs text-muted-foreground leading-tight">Borrower</p>
           </div>
           <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 hidden sm:block" aria-hidden />
         </DropdownMenuTrigger>
@@ -122,7 +120,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
               </Avatar>
               <div>
                 <p className="font-medium">USER ONE</p>
-                <p className="text-xs text-muted-foreground">userone@enligne.rw</p>
+                <p className="text-xs text-muted-foreground">user@kijanifinance.com</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <span className="w-2 h-2 rounded-full bg-success" />
                   <span className="text-xs text-muted-foreground">ID: 888985925</span>

@@ -6,15 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ChatPanelProvider } from "@/contexts/ChatPanelContext";
-import { MattersProvider } from "@/contexts/MattersContext";
+import { LoansProvider } from "@/contexts/LoansContext";
 
 const Index = lazy(() => import("./pages/Index"));
-const Matters = lazy(() => import("./pages/Matters"));
-const MatterDetail = lazy(() => import("./pages/MatterDetail"));
-const Documents = lazy(() => import("./pages/Documents"));
-const Calendar = lazy(() => import("./pages/Calendar"));
-const Contacts = lazy(() => import("./pages/Contacts"));
-const Timesheets = lazy(() => import("./pages/Timesheets"));
+const Loans = lazy(() => import("./pages/Loans"));
+const LoanDetail = lazy(() => import("./pages/LoanDetail"));
+const Stock = lazy(() => import("./pages/Stock"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -30,7 +27,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <ChatPanelProvider>
-          <MattersProvider>
+          <LoansProvider>
           <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center bg-background" aria-live="polite" aria-busy="true">
               <div className="text-muted-foreground text-sm">Loading…</div>
@@ -38,12 +35,9 @@ const App = () => (
           }>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/matters" element={<Matters />} />
-            <Route path="/matters/:id" element={<MatterDetail />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/timesheets" element={<Timesheets />} />
+            <Route path="/loans" element={<Loans />} />
+            <Route path="/loans/:id" element={<LoanDetail />} />
+            <Route path="/stock" element={<Stock />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
@@ -51,7 +45,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
-        </MattersProvider>
+        </LoansProvider>
         </ChatPanelProvider>
         </BrowserRouter>
       </TooltipProvider>

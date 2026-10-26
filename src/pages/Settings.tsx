@@ -29,7 +29,7 @@ export default function Settings() {
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Your personal preferences. Firm-wide settings are in the Admin Dashboard (coming later).
+            Your personal preferences.
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function Settings() {
             <h2 className="font-semibold">Theme</h2>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Choose how SHERIA looks. Light, Dark, or match your system.
+            Choose how Kijani looks. Light, Dark, or match your system.
           </p>
           {mounted && (
             <div className="flex flex-wrap gap-2">
@@ -95,7 +95,7 @@ export default function Settings() {
                       const perm = await Notification.requestPermission();
                       if (perm === "granted") {
                         try {
-                          new Notification("Sheria", { body: "Desktop notifications enabled" });
+                          new Notification("Kijani", { body: "Desktop notifications enabled" });
                         } catch (err) {
                           // ignore
                         }
@@ -139,9 +139,6 @@ export default function Settings() {
           </div>
         </section>
 
-        <p className="text-xs text-muted-foreground pt-2">
-          Firm-wide settings (users, roles, firm profile, billing, jurisdiction) will be available in the Admin Dashboard.
-        </p>
       </div>
     </AppLayout>
   );

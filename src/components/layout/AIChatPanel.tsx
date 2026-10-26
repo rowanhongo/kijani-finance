@@ -21,12 +21,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabaseClient";
 
 const MAX_OPEN_CHATS = 2;
-const CHAT_HISTORY_KEY = "sheria-chat-history";
+const CHAT_HISTORY_KEY = "kijani-chat-history";
 
 const REFERENCE_OPTIONS = [
-  { value: "My Sources", label: "My Sources" },
-  { value: "Documents", label: "Documents" },
-  { value: "SLL", label: "SLL" },
+  { value: "Loans", label: "Loans" },
+  { value: "Stock", label: "Stock" },
+  { value: "Kijani Guide", label: "Kijani Guide" },
 ] as const;
 
 type ReferenceValue = (typeof REFERENCE_OPTIONS)[number]["value"];
@@ -73,7 +73,7 @@ interface AIChatPanelProps {
   context?: string;
 }
 
-export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
+export function AIChatPanel({ context = "Kijani Guide" }: AIChatPanelProps) {
   const { isMinimized, setIsMinimized } = useChatPanel();
   const isMobile = useIsMobile();
   const [message, setMessage] = useState("");
@@ -317,7 +317,7 @@ export function AIChatPanel({ context = "My Sources" }: AIChatPanelProps) {
         <SelectContent>
           {REFERENCE_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value} className="text-sm">
-              {opt.label === "SLL" ? "SLL (Sheria Law Library)" : opt.label}
+              {opt.label}
             </SelectItem>
           ))}
         </SelectContent>

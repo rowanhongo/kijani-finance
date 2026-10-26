@@ -16,10 +16,9 @@ export function AppLayout({ children, showRibbon }: AppLayoutProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const getAIContext = () => {
-    if (location.pathname.startsWith("/matters")) return "Current Matter";
-    if (location.pathname.startsWith("/documents")) return "Documents";
-    if (location.pathname.startsWith("/sources")) return "My Sources";
-    return "My Sources";
+    if (location.pathname.startsWith("/loans")) return "Loans";
+    if (location.pathname.startsWith("/stock")) return "Stock";
+    return "Kijani Guide";
   };
 
   return (

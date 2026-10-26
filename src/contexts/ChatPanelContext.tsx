@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState } from "react";
 
-const CHAT_MINIMIZED_KEY = "sheria-chat-minimized";
+const CHAT_MINIMIZED_KEY = "kijani-chat-minimized";
 
 interface ChatPanelContextValue {
   isMinimized: boolean;

@@ -1,6 +1,14 @@
-# SHERIA
+# Kijani Finance
 
-Legal practice management: matters documents calendar timesheets and AI chat.
+Low-interest loans for Kenyan farmers and traders, secured by cereals stored in certified warehouses.
+
+- Record stock held in a certified warehouse (cereals only for now)
+- Borrow up to 90% of the stock's invoice value over 7, 14 or 30 days
+- Receive the advance as stablecoin in a Stellar wallet
+- Repay to release the stock; each stock deposit and advance gets a ledger reference so the same harvest cannot be pledged twice
+- Kijani assistant chat for borrower questions
+
+Very early MVP. Data is stored in the browser (localStorage) and ledger references are simulated. Interest, Stellar recording and warehouse verification are not implemented yet.
 
 ## Tech stack
 

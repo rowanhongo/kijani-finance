@@ -1,10 +1,8 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Home,
-  Scale,
-  FileText,
-  Calendar,
-  Clock,
+  Banknote,
+  Wheat,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -23,10 +21,8 @@ interface NavItem {
 
 export const navItems: NavItem[] = [
   { icon: Home, label: "Home", path: "/" },
-  { icon: Scale, label: "Matters", path: "/matters" },
-  { icon: FileText, label: "Documents", path: "/documents" },
-  { icon: Calendar, label: "Calendar", path: "/calendar" },
-  { icon: Clock, label: "Timesheets", path: "/timesheets" },
+  { icon: Banknote, label: "Loans", path: "/loans" },
+  { icon: Wheat, label: "Stock", path: "/stock" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
